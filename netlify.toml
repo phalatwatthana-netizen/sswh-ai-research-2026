@@ -1,0 +1,9 @@
+# Netlify configuration
+# Serves the static site from the repository root.
+[build]
+  publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
