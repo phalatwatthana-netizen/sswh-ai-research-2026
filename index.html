@@ -1563,7 +1563,7 @@
                 // สร้าง HTML แบ่งหน้ากระดาษ A4 ลงใน Wrapper
                 const wrapper = document.getElementById('dashboard-a4-wrapper');
                 wrapper.innerHTML = `
-                    <!-- หน้า 1 -->
+                    <!-- หน้า 1: ข้อมูลทั่วไป -->
                     <div class="a4-container dashboard-page relative z-10 shrink-0 bg-white" style="min-height: 297mm; display: flex; flex-direction: column;">
                         <div class="text-right" style="font-size: 10pt; color: #64748b; margin-bottom: 5px;">${dateText}</div>
                         <h1 style="font-size: 16pt; font-weight: bold; margin-bottom: 6px; text-align: center;">รายงานสรุปผลการประเมินความพึงพอใจ${sessionText}</h1>
@@ -1588,23 +1588,26 @@
                             </div>
                         </div>
                         ${buildGeneralInfoA4(currentGeneralData)}
+                    </div>
 
-                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">2. สรุปคะแนนเฉลี่ยแยกตามหมวดหมู่</h2>
-                        <div style="height: 140px; width: 100%; margin-bottom: 20px;">
+                    <!-- หน้า 2: สรุปคะแนนเฉลี่ยแยกตามหมวดหมู่ -->
+                    <div class="a4-container dashboard-page relative z-10 shrink-0 bg-white" style="min-height: 297mm; display: flex; flex-direction: column;">
+                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 5px; margin-bottom: 10px;">2. สรุปคะแนนเฉลี่ยแยกตามหมวดหมู่</h2>
+                        <div style="height: 220px; width: 100%; margin-bottom: 24px;">
                             <canvas id="previewBarChart"></canvas>
                         </div>
                         ${buildCategoryA4(currentDashboardData)}
                     </div>
 
-                    <!-- หน้า 2 -->
+                    <!-- หน้า 3: ตารางรายข้อ (หมวด 1-3) -->
                     <div class="a4-container dashboard-page relative z-10 shrink-0 bg-white" style="min-height: 297mm; display: flex; flex-direction: column;">
-                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">3. ตารางสรุปคะแนนประเมินรายข้อ</h2>
+                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 5px; margin-bottom: 10px;">3. ตารางสรุปคะแนนประเมินรายข้อ</h2>
                         ${buildTableHTML(page2Data)}
                     </div>
 
-                    <!-- หน้า 3 -->
+                    <!-- หน้า 4: ตารางรายข้อ (หมวด 4-5) + ข้อเสนอแนะ -->
                     <div class="a4-container dashboard-page relative z-10 shrink-0 bg-white" style="min-height: 297mm; display: flex; flex-direction: column;">
-                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 10px; margin-bottom: 10px;">3. ตารางสรุปคะแนนประเมินรายข้อ (ต่อ)</h2>
+                        <h2 style="font-size: 12pt; font-weight: bold; margin-top: 5px; margin-bottom: 10px;">3. ตารางสรุปคะแนนประเมินรายข้อ (ต่อ)</h2>
                         ${buildTableHTML(page3Data)}
 
                         <h2 style="font-size: 12pt; font-weight: bold; margin-top: 20px; margin-bottom: 15px;">4. ข้อเสนอแนะเพิ่มเติม</h2>
