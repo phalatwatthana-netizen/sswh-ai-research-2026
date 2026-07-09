@@ -933,7 +933,11 @@
 
                     const fontSize = chart.config.options.plugins?.calloutPlugin?.fontSize || 11;
 
-                    ctx.save();
+                    const extension = 12;
+                    const horizLength = 10;
+
+                    // รวบรวมตำแหน่งป้ายกำกับทั้งหมดก่อน เพื่อจัดการไม่ให้ป้ายทับกัน
+                    const items = [];
                     meta.data.forEach((arc, i) => {
                         const value = dataset.data[i];
                         if (!value || value === 0) return;
@@ -948,34 +952,53 @@
                         const startX = arc.x + Math.cos(centerAngle) * outerRadius;
                         const startY = arc.y + Math.sin(centerAngle) * outerRadius;
 
-                        const extension = 12;
                         const midX = arc.x + Math.cos(centerAngle) * (outerRadius + extension);
                         const midY = arc.y + Math.sin(centerAngle) * (outerRadius + extension);
 
-                        const horizLength = 10;
-                        const endX = midX + (isRightSide ? horizLength : -horizLength);
-                        const endY = midY;
+                        const percentage = Math.round((value * 100) / sum);
 
-                        // วาดเส้นโยง
+                        items.push({
+                            isRightSide, startX, startY, midX, midY,
+                            targetY: midY,
+                            color: dataset.backgroundColor[i % dataset.backgroundColor.length],
+                            text: `${value} (${percentage}%)`
+                        });
+                    });
+
+                    // แยกซ้าย/ขวา แล้วดันป้ายที่ชิดกันเกินไปให้ห่างกันในแนวตั้ง (กันการทับซ้อน)
+                    const lineHeight = fontSize + 6;
+                    ['right', 'left'].forEach(side => {
+                        const isRight = side === 'right';
+                        const group = items.filter(it => it.isRightSide === isRight).sort((a, b) => a.midY - b.midY);
+                        for (let k = 1; k < group.length; k++) {
+                            if (group[k].targetY - group[k - 1].targetY < lineHeight) {
+                                group[k].targetY = group[k - 1].targetY + lineHeight;
+                            }
+                        }
+                    });
+
+                    ctx.save();
+                    items.forEach(it => {
+                        const endX = it.midX + (it.isRightSide ? horizLength : -horizLength);
+                        const endY = it.targetY;
+
+                        // วาดเส้นโยง (หักมุมไปยังตำแหน่งป้ายที่จัดใหม่แล้ว)
                         ctx.beginPath();
-                        ctx.moveTo(startX, startY);
-                        ctx.lineTo(midX, midY);
+                        ctx.moveTo(it.startX, it.startY);
+                        ctx.lineTo(it.midX, it.midY);
                         ctx.lineTo(endX, endY);
-                        ctx.strokeStyle = dataset.backgroundColor[i % dataset.backgroundColor.length];
+                        ctx.strokeStyle = it.color;
                         ctx.lineWidth = 1.5;
                         ctx.stroke();
 
                         // วาด Text แสดง n(%)
-                        const percentage = Math.round((value * 100) / sum);
-                        const text = `${value} (${percentage}%)`;
-
                         ctx.font = `bold ${fontSize}px 'Prompt', sans-serif`;
                         ctx.fillStyle = '#334155';
-                        ctx.textAlign = isRightSide ? 'left' : 'right';
+                        ctx.textAlign = it.isRightSide ? 'left' : 'right';
                         ctx.textBaseline = 'middle';
 
                         const textPadding = 4;
-                        ctx.fillText(text, endX + (isRightSide ? textPadding : -textPadding), endY);
+                        ctx.fillText(it.text, endX + (it.isRightSide ? textPadding : -textPadding), endY);
                     });
                     ctx.restore();
                 }
@@ -1156,6 +1179,7 @@
                         options: {
                             responsive: true,
                             maintainAspectRatio: false,
+                            layout: { padding: { top: 28 } },
                             plugins: {
                                 legend: { display: false },
                                 tooltip: {
@@ -1609,7 +1633,7 @@
                             data: { labels, datasets: [{ data, backgroundColor: palette, borderWidth: 1 }] },
                             options: {
                                 responsive: true, maintainAspectRatio: false, cutout: '55%', animation: false,
-                                layout: { padding: { left: 65, right: 65, top: 20, bottom: 20 } },
+                                layout: { padding: { left: 65, right: 65, top: 26, bottom: 26 } },
                                 plugins: {
                                     legend: { position: 'bottom', labels: { font: { family: "'Prompt', sans-serif", size: 9 }, boxWidth: 8, padding: 5 } },
                                     datalabels: { display: false },
@@ -1650,6 +1674,7 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             animation: false,
+                            layout: { padding: { top: 20 } },
                             plugins: {
                                 legend: { display: false },
                                 datalabels: {
