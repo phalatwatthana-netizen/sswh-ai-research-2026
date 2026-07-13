@@ -263,6 +263,13 @@
                         <div id="cert-autocomplete-list" class="absolute z-50 w-full glass-effect border border-slate-200 rounded-xl shadow-lg mt-1 max-h-60 overflow-y-auto hidden divide-y divide-slate-100/50">
                         </div>
                     </div>
+
+                    <div class="space-y-2 mt-4">
+                        <label class="text-base font-semibold text-slate-800">อีเมลผู้รับ <span class="text-slate-400 font-normal text-sm">(สำหรับส่งเกียรติบัตรเข้าอีเมล)</span></label>
+                        <input type="email" id="cert-email-input" placeholder="example@email.com" autocomplete="off"
+                            class="w-full p-3 border-2 border-brand-blue/30 rounded-xl focus:ring-4 focus:ring-brand-blue/20 focus:border-brand-blue outline-none text-base font-medium text-slate-800 bg-white shadow-md shadow-brand-blue/10 transition-all duration-300 hover:border-brand-blue/50 hover:shadow-lg hover:shadow-brand-blue/20" />
+                        <p class="text-red-500 text-sm font-medium mt-1 hidden" id="error-cert-email">กรุณาระบุอีเมลให้ถูกต้อง</p>
+                    </div>
                 </div>
                 <div class="flex items-end h-full mt-auto pt-4 md:pt-0 gap-4 flex-wrap justify-end w-full md:w-auto">
                     <button id="btn-cert-jpg" class="flex-1 md:flex-none bg-gradient-to-r from-brand-green to-emerald-500 text-white px-6 py-4 rounded-xl text-base font-bold hover:shadow-lg hover:shadow-brand-green/30 transition-all flex items-center justify-center gap-2 border border-white/20">
@@ -272,6 +279,10 @@
                     <button id="btn-cert-pdf" class="flex-1 md:flex-none bg-gradient-to-r from-brand-blue to-brand-purple text-white px-6 py-4 rounded-xl text-base font-bold hover:shadow-lg hover:shadow-brand-purple/30 transition-all flex items-center justify-center gap-2 border border-white/20">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13v6"/><path d="M10 13c1.105 0 2 .895 2 2s-.895 2-2 2H8"/></svg>
                         บันทึก PDF
+                    </button>
+                    <button id="btn-cert-email" class="flex-1 md:flex-none bg-gradient-to-r from-brand-pink to-brand-purple text-white px-6 py-4 rounded-xl text-base font-bold hover:shadow-lg hover:shadow-brand-pink/30 transition-all flex items-center justify-center gap-2 border border-white/20">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        ส่งเข้าอีเมล
                     </button>
                 </div>
             </div>
@@ -1955,6 +1966,139 @@
                     btnSubmit.innerHTML = `ส่งแบบประเมิน`;
                     showToast("เกิดข้อผิดพลาดในการบันทึกข้อมูล", "error");
                 }
+            });
+
+            // -----------------------------------------------------
+            // ใบประกาศ: บันทึก JPG / PDF และส่งเข้าอีเมล
+            // -----------------------------------------------------
+            // URL ของ Google Apps Script Web App สำหรับส่งเกียรติบัตรเข้าอีเมล
+            // (นำ URL ที่ได้จากการ Deploy Apps Script มาวางแทนด้านล่าง)
+            const CERT_MAIL_URL = "https://script.google.com/macros/s/AKfycbyJKUb4y79m7AXjh45ifkd0w7bKWeqGIB28mX6lu11nnt4kyxk11keMGfprDVSSVtIwXg/exec";
+
+            const getCertName = () => document.getElementById('cert-name-input').value.trim();
+
+            const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+            // สร้างภาพใบประกาศจากพื้นที่ที่แสดงผล (คืนค่าเป็น canvas)
+            const generateCertificateCanvas = async () => {
+                const el = document.getElementById('cert-printable-area');
+                return await html2canvas(el, {
+                    scale: 2,
+                    useCORS: true,
+                    backgroundColor: '#ffffff'
+                });
+            };
+
+            // แสดงสถานะโหลดบนปุ่ม แล้วคืนค่าเดิมเมื่อเสร็จ
+            const withButtonLoading = async (btn, task) => {
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> กำลังทำ...`;
+                try {
+                    await task();
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                }
+            };
+
+            // บันทึกใบประกาศเป็น JPG
+            document.getElementById('btn-cert-jpg').addEventListener('click', function() {
+                if (!getCertName()) {
+                    showToast("กรุณาระบุชื่อ-นามสกุลก่อน", "error");
+                    document.getElementById('cert-name-input').focus();
+                    return;
+                }
+                withButtonLoading(this, async () => {
+                    try {
+                        const canvas = await generateCertificateCanvas();
+                        const link = document.createElement('a');
+                        link.download = `เกียรติบัตร-${getCertName()}.jpg`;
+                        link.href = canvas.toDataURL('image/jpeg', 0.95);
+                        link.click();
+                        showToast("บันทึกไฟล์ JPG สำเร็จ", "success");
+                    } catch (error) {
+                        console.error("Cert JPG Error:", error);
+                        showToast("บันทึก JPG ไม่สำเร็จ", "error");
+                    }
+                });
+            });
+
+            // บันทึกใบประกาศเป็น PDF (แนวนอน A4)
+            document.getElementById('btn-cert-pdf').addEventListener('click', function() {
+                if (!getCertName()) {
+                    showToast("กรุณาระบุชื่อ-นามสกุลก่อน", "error");
+                    document.getElementById('cert-name-input').focus();
+                    return;
+                }
+                withButtonLoading(this, async () => {
+                    try {
+                        const canvas = await generateCertificateCanvas();
+                        const { jsPDF } = window.jspdf;
+                        const pdf = new jsPDF('l', 'mm', 'a4');
+                        const pdfWidth = 297;
+                        const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+                        pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, pdfWidth, Math.min(imgHeight, 210));
+                        pdf.save(`เกียรติบัตร-${getCertName()}.pdf`);
+                        showToast("บันทึกไฟล์ PDF สำเร็จ", "success");
+                    } catch (error) {
+                        console.error("Cert PDF Error:", error);
+                        showToast("บันทึก PDF ไม่สำเร็จ", "error");
+                    }
+                });
+            });
+
+            // ล้าง error ของอีเมลเมื่อพิมพ์
+            document.getElementById('cert-email-input').addEventListener('input', function() {
+                removeErrorState('cert-email-input', 'error-cert-email');
+            });
+
+            // ส่งใบประกาศเข้าอีเมล
+            document.getElementById('btn-cert-email').addEventListener('click', function() {
+                const name = getCertName();
+                const email = document.getElementById('cert-email-input').value.trim();
+
+                if (!name) {
+                    showToast("กรุณาระบุชื่อ-นามสกุลก่อน", "error");
+                    document.getElementById('cert-name-input').focus();
+                    return;
+                }
+                if (!isValidEmail(email)) {
+                    document.getElementById('cert-email-input').classList.add('input-error');
+                    document.getElementById('error-cert-email').classList.remove('hidden');
+                    showToast("กรุณาระบุอีเมลผู้รับให้ถูกต้อง", "error");
+                    return;
+                }
+                if (CERT_MAIL_URL === "YOUR_CERTIFICATE_MAIL_APPS_SCRIPT_URL") {
+                    showToast("ยังไม่ได้ตั้งค่า URL สำหรับส่งอีเมล (CERT_MAIL_URL)", "error");
+                    return;
+                }
+
+                withButtonLoading(this, async () => {
+                    try {
+                        const canvas = await generateCertificateCanvas();
+                        // ตัด prefix "data:image/jpeg;base64," ออก เหลือเฉพาะ base64
+                        const imgBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+
+                        await fetch(CERT_MAIL_URL, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                action: 'sendCertificate',
+                                name: name,
+                                email: email,
+                                image: imgBase64,
+                                filename: `เกียรติบัตร-${name}`
+                            })
+                        });
+
+                        showToast(`ส่งเกียรติบัตรไปที่ ${email} แล้ว`, "success");
+                    } catch (error) {
+                        console.error("Cert Email Error:", error);
+                        showToast("ส่งอีเมลไม่สำเร็จ กรุณาลองใหม่", "error");
+                    }
+                });
             });
 
             // Start processing
