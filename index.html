@@ -2290,7 +2290,10 @@
                         let nameIdx = headers.findIndex(h => normalize(h).includes("ใบประกาศ"));
                         if (nameIdx === -1) nameIdx = headers.findIndex(h => normalize(h).includes("ชื่อ") && normalize(h).includes("สกุล"));
                         if (nameIdx === -1) nameIdx = headers.findIndex(h => normalize(h).includes("ชื่อ"));
-                        const sessionIdx = headers.findIndex(h => normalize(h).includes("ครั้งที่"));
+                        // ใช้คอลัมน์ "ครั้งที่เข้าอบรม" เป็นหลัก (fallback เป็นคอลัมน์ที่มีคำว่า "ครั้งที่")
+                        let sessionIdx = headers.findIndex(h => normalize(h).includes("ครั้งที่เข้าอบรม"));
+                        if (sessionIdx === -1) sessionIdx = headers.findIndex(h => normalize(h).includes("เข้าอบรม"));
+                        if (sessionIdx === -1) sessionIdx = headers.findIndex(h => normalize(h).includes("ครั้งที่"));
 
                         const sessionSet = new Set();
                         rows.slice(1).forEach(r => {
