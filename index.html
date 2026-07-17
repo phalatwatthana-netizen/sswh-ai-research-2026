@@ -157,6 +157,10 @@
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
                 <span>แดชบอร์ด</span>
             </button>
+            <button id="nav-lucky-draw" class="w-full flex items-center space-x-3 p-3 rounded-xl transition-all text-slate-500 hover:bg-white/50 hover:shadow-sm font-semibold">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+                <span>จับรางวัล</span>
+            </button>
         </div>
     </nav>
 
@@ -169,9 +173,13 @@
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
             <span class="text-[10px] font-semibold mt-1">ใบประกาศ</span>
         </button>
-        <button id="nav-dashboard-mobile" class="flex flex-col items-center p-2 text-slate-500 flex-1">
+        <button id="nav-dashboard-mobile" class="flex flex-col items-center p-2 text-slate-500 flex-1 border-r border-white/50">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
             <span class="text-[10px] font-semibold mt-1">แดชบอร์ด</span>
+        </button>
+        <button id="nav-lucky-draw-mobile" class="flex flex-col items-center p-2 text-slate-500 flex-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
+            <span class="text-[10px] font-semibold mt-1">จับรางวัล</span>
         </button>
     </div>
 
@@ -214,6 +222,16 @@
                         <h3 class="font-bold text-xl text-slate-800">ข้อมูลทั่วไป</h3>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm" id="section-1-container">
+                        <div class="space-y-2">
+                            <label class="text-base font-semibold text-slate-700">ชื่อ <span class="text-brand-pink">*</span></label>
+                            <input type="text" id="input-fname" placeholder="ระบุชื่อ" autocomplete="off" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 disabled:opacity-50 transition-all duration-300 hover:border-brand-purple/50 hover:shadow-lg hover:shadow-brand-purple/20" />
+                            <p class="text-red-500 text-sm font-medium mt-1 hidden" id="error-fname">กรุณาระบุชื่อ</p>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="text-base font-semibold text-slate-700">นามสกุล <span class="text-brand-pink">*</span></label>
+                            <input type="text" id="input-lname" placeholder="ระบุนามสกุล" autocomplete="off" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 disabled:opacity-50 transition-all duration-300 hover:border-brand-purple/50 hover:shadow-lg hover:shadow-brand-purple/20" />
+                            <p class="text-red-500 text-sm font-medium mt-1 hidden" id="error-lname">กรุณาระบุนามสกุล</p>
+                        </div>
                         <div id="select-session-container"></div>
                         <div id="select-gender-container"></div>
                         <div class="space-y-2">
@@ -479,6 +497,52 @@
                 </div>
             </div>
         </div>
+
+        <!-- ==================== LUCKY DRAW TAB ==================== -->
+        <div id="tab-lucky-draw" class="max-w-4xl mx-auto space-y-8 pb-10 hidden-section">
+            <div class="glass-effect p-6 md:p-8 rounded-3xl relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-b from-white/60 to-transparent -z-10"></div>
+                <div class="text-center mb-8">
+                    <h2 class="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-pink via-brand-purple to-brand-blue mb-3">🎉 จับรางวัลผู้โชคดี</h2>
+                    <p class="text-slate-600 font-medium text-base md:text-lg">สุ่มรายชื่อผู้โชคดีจากผู้ตอบแบบประเมิน</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-5 bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm">
+                    <div class="space-y-2">
+                        <label class="text-base font-semibold text-slate-700">เลือกครั้งที่</label>
+                        <select id="draw-session-filter" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 cursor-pointer transition-all hover:border-brand-purple/50">
+                            <option value="">ทุกครั้ง</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="text-base font-semibold text-slate-700">จำนวนรางวัล</label>
+                        <input type="number" id="draw-count" min="1" value="1" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 transition-all hover:border-brand-purple/50" />
+                    </div>
+                    <div class="space-y-2 flex flex-col">
+                        <label class="text-base font-semibold text-slate-700">&nbsp;</label>
+                        <button id="btn-draw" class="w-full bg-gradient-to-r from-brand-pink via-brand-purple to-brand-blue text-white p-3 rounded-xl font-bold text-lg hover:shadow-lg hover:shadow-brand-purple/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 border border-white/20 disabled:opacity-60">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15"/></svg>
+                            สุ่มจับรางวัล
+                        </button>
+                    </div>
+                </div>
+
+                <p class="text-sm text-slate-500 font-medium mt-4 flex items-center gap-2" id="draw-pool-info">
+                    <svg id="draw-loading-icon" class="w-4 h-4 text-brand-purple animate-spin hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                    <span id="draw-pool-text">กำลังโหลดรายชื่อ...</span>
+                </p>
+            </div>
+
+            <!-- Winners result -->
+            <div id="draw-result" class="glass-effect p-6 md:p-10 rounded-3xl relative overflow-hidden hidden">
+                <div class="absolute inset-0 bg-gradient-to-br from-brand-pink/5 via-transparent to-brand-purple/5 -z-10"></div>
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#8b5cf6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5C6 4 7 5 7 5"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5C18 4 17 5 17 5"/><path d="M8 22h8"/><path d="M12 15v7"/><path d="M12 15a5 5 0 0 0 5-5V3H7v7a5 5 0 0 0 5 5Z"/></svg>
+                    <h3 class="text-2xl md:text-3xl font-bold text-slate-800">รายชื่อผู้โชคดี</h3>
+                </div>
+                <div id="draw-winners" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
+            </div>
+        </div>
     </main>
 
     <script>
@@ -553,7 +617,9 @@
             };
 
             const switchTab = (tabName) => {
-                const tabs = ['survey', 'certificate', 'dashboard'];
+                const tabs = ['survey', 'certificate', 'dashboard', 'lucky-draw'];
+                // เส้นคั่นของปุ่มเมนูล่างบนมือถือ (ให้ตำแหน่งขอบคงเดิมไม่ว่าปุ่มไหน active)
+                const mobBorders = { 'survey': '', 'certificate': ' border-l border-r border-white/50', 'dashboard': ' border-r border-white/50', 'lucky-draw': '' };
 
                 tabs.forEach(t => {
                     document.getElementById(`tab-${t}`).classList.toggle('hidden-section', t !== tabName);
@@ -569,16 +635,18 @@
 
                     const mobBtn = document.getElementById(`nav-${t}-mobile`);
                     if (mobBtn) {
+                        const border = mobBorders[t] || '';
                         if (t === tabName) {
-                            mobBtn.className = "flex flex-col items-center p-2 text-brand-purple flex-1" + (t==='certificate' ? ' border-l border-r border-white/50' : '');
+                            mobBtn.className = "flex flex-col items-center p-2 text-brand-purple flex-1" + border;
                         } else {
-                            mobBtn.className = "flex flex-col items-center p-2 text-slate-500 flex-1" + (t==='certificate' ? ' border-l border-r border-white/50' : '');
+                            mobBtn.className = "flex flex-col items-center p-2 text-slate-500 flex-1" + border;
                         }
                     }
                 });
 
                 if (tabName === 'dashboard') fetchDashboardData();
                 if (tabName === 'certificate') updateCertificateName();
+                if (tabName === 'lucky-draw') fetchDrawNames();
             };
 
             const updateCertificateName = () => {
@@ -651,6 +719,14 @@
             // Remove Age Error on input
             document.getElementById('input-age').addEventListener('input', function() {
                 removeErrorState('input-age', 'error-age');
+            });
+
+            // ล้าง error ของช่องชื่อ-นามสกุล เมื่อพิมพ์
+            document.getElementById('input-fname').addEventListener('input', function() {
+                removeErrorState('input-fname', 'error-fname');
+            });
+            document.getElementById('input-lname').addEventListener('input', function() {
+                removeErrorState('input-lname', 'error-lname');
             });
 
             const renderFormUI = () => {
@@ -1428,9 +1504,12 @@
             document.getElementById('nav-certificate').addEventListener('click', () => switchTab('certificate'));
             document.getElementById('nav-dashboard').addEventListener('click', () => switchTab('dashboard'));
 
+            document.getElementById('nav-lucky-draw').addEventListener('click', () => switchTab('lucky-draw'));
+
             document.getElementById('nav-survey-mobile').addEventListener('click', () => switchTab('survey'));
             document.getElementById('nav-certificate-mobile').addEventListener('click', () => switchTab('certificate'));
             document.getElementById('nav-dashboard-mobile').addEventListener('click', () => switchTab('dashboard'));
+            document.getElementById('nav-lucky-draw-mobile').addEventListener('click', () => switchTab('lucky-draw'));
 
             document.getElementById('btn-refresh').addEventListener('click', fetchDashboardData);
 
@@ -1899,6 +1978,20 @@
 
                 let hasError = false;
 
+                // Validate ชื่อ-นามสกุล
+                const fnameInput = document.getElementById('input-fname');
+                const lnameInput = document.getElementById('input-lname');
+                if (!fnameInput.value.trim()) {
+                    fnameInput.classList.add('input-error');
+                    document.getElementById('error-fname').classList.remove('hidden');
+                    hasError = true;
+                }
+                if (!lnameInput.value.trim()) {
+                    lnameInput.classList.add('input-error');
+                    document.getElementById('error-lname').classList.remove('hidden');
+                    hasError = true;
+                }
+
                 // Validate Section 1 Dropdowns and Inputs
                 ['session', 'gender', 'position', 'department'].forEach(prefix => {
                     const sel = document.getElementById(`select-${prefix}`);
@@ -1960,8 +2053,9 @@
                 btnSubmit.disabled = true;
                 btnSubmit.innerHTML = `<svg class="animate-spin w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> กำลังบันทึกข้อมูล...`;
 
+                const fullName = (document.getElementById('input-fname').value.trim() + ' ' + document.getElementById('input-lname').value.trim()).trim();
                 const payload = {
-                    "ชื่อ-สกุล (ใบประกาศ)": document.getElementById('cert-name-input').value.trim() || "ไม่ระบุชื่อ",
+                    "ชื่อ-สกุล (ใบประกาศ)": fullName || "ไม่ระบุชื่อ",
                     "ครั้งที่เข้าอบรม": getSelectValue('session'),
                     "เพศ": getSelectValue('gender'),
                     "อายุ (ปี)": document.getElementById('input-age').value,
@@ -1998,6 +2092,10 @@
                         setTimeout(() => {
                             modal.classList.add('hidden');
                             modal.classList.remove('flex');
+
+                            // เติมชื่อจากแบบประเมินลงหน้าใบประกาศอัตโนมัติ
+                            const certInput = document.getElementById('cert-name-input');
+                            if (certInput) certInput.value = fullName;
 
                             // Switch to certificate tab automatically after success
                             switchTab('certificate');
@@ -2153,6 +2251,140 @@
                         showToast("ส่งอีเมลไม่สำเร็จ กรุณาลองใหม่", "error");
                     }
                 });
+            });
+
+            // -----------------------------------------------------
+            // จับรางวัล: ดึงรายชื่อผู้ตอบแบบประเมิน แล้วสุ่มผู้โชคดี
+            // -----------------------------------------------------
+            let drawEntries = [];      // [{ name, session }]
+            let isFetchingDraw = false;
+
+            const updateDrawPoolInfo = () => {
+                const selected = document.getElementById('draw-session-filter').value;
+                const pool = [...new Set(
+                    drawEntries.filter(e => !selected || e.session === selected).map(e => e.name)
+                )];
+                const label = selected ? `ครั้งที่ ${selected}` : 'ทุกครั้ง';
+                document.getElementById('draw-pool-text').innerText = `มีรายชื่อที่ร่วมจับรางวัล (${label}): ${pool.length} คน`;
+            };
+
+            const fetchDrawNames = async () => {
+                if (isFetchingDraw) return;
+                isFetchingDraw = true;
+
+                const loadingIcon = document.getElementById('draw-loading-icon');
+                loadingIcon.classList.remove('hidden');
+                document.getElementById('draw-pool-text').innerText = 'กำลังโหลดรายชื่อ...';
+
+                try {
+                    const normalize = s => s.replace(/\s+/g, '').toLowerCase();
+                    const url = `https://docs.google.com/spreadsheets/d/10VsSDUgrGtgh5vAs_cWanBNmtKIdlbf1aH7_ZLixsdk/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent('ประเมินโครงการ2')}`;
+                    const response = await fetch(url);
+                    const csvText = await response.text();
+                    const rows = csvText.split('\n').filter(r => r.trim());
+
+                    drawEntries = [];
+                    if (rows.length > 1) {
+                        const headers = parseCSVRow(rows[0]);
+                        // หาคอลัมน์ชื่อ (ใบประกาศ) และคอลัมน์ครั้งที่
+                        let nameIdx = headers.findIndex(h => normalize(h).includes("ใบประกาศ"));
+                        if (nameIdx === -1) nameIdx = headers.findIndex(h => normalize(h).includes("ชื่อ") && normalize(h).includes("สกุล"));
+                        if (nameIdx === -1) nameIdx = headers.findIndex(h => normalize(h).includes("ชื่อ"));
+                        const sessionIdx = headers.findIndex(h => normalize(h).includes("ครั้งที่"));
+
+                        const sessionSet = new Set();
+                        rows.slice(1).forEach(r => {
+                            const cols = parseCSVRow(r);
+                            const name = nameIdx !== -1 ? (cols[nameIdx] || '').trim() : '';
+                            const session = sessionIdx !== -1 ? (cols[sessionIdx] || '').trim() : '';
+                            if (name && name !== 'ไม่ระบุชื่อ' && name.toLowerCase() !== 'undefined') {
+                                drawEntries.push({ name, session });
+                                if (session) sessionSet.add(session);
+                            }
+                        });
+
+                        // เติมตัวเลือกครั้งที่
+                        const sessions = [...sessionSet].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+                        const filterEl = document.getElementById('draw-session-filter');
+                        const prev = filterEl.value;
+                        let optionsHTML = `<option value="">ทุกครั้ง</option>`;
+                        sessions.forEach(s => { optionsHTML += `<option value="${s}">ครั้งที่ ${s}</option>`; });
+                        filterEl.innerHTML = optionsHTML;
+                        filterEl.value = prev;
+                    }
+
+                    updateDrawPoolInfo();
+                } catch (error) {
+                    console.error('Error fetching draw names:', error);
+                    document.getElementById('draw-pool-text').innerText = 'โหลดรายชื่อไม่สำเร็จ กรุณาลองใหม่';
+                    showToast("ไม่สามารถโหลดรายชื่อจับรางวัลได้", "error");
+                } finally {
+                    loadingIcon.classList.add('hidden');
+                    isFetchingDraw = false;
+                }
+            };
+
+            const renderWinners = (winners) => {
+                const result = document.getElementById('draw-result');
+                const container = document.getElementById('draw-winners');
+                container.innerHTML = '';
+                result.classList.remove('hidden');
+
+                winners.forEach((name, i) => {
+                    const card = document.createElement('div');
+                    card.className = "bg-white/70 border-2 border-brand-purple/20 rounded-2xl p-5 flex items-center gap-4 shadow-sm opacity-0 translate-y-3 transition-all duration-500";
+                    card.innerHTML = `
+                        <div class="w-12 h-12 rounded-full bg-gradient-to-br from-brand-pink to-brand-purple text-white flex items-center justify-center font-bold text-xl shadow-md shrink-0">${i + 1}</div>
+                        <div class="font-bold text-lg md:text-xl text-slate-800 leading-snug">${name}</div>
+                    `;
+                    container.appendChild(card);
+                    setTimeout(() => card.classList.remove('opacity-0', 'translate-y-3'), 120 + i * 160);
+                });
+
+                result.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+
+            document.getElementById('draw-session-filter').addEventListener('change', updateDrawPoolInfo);
+
+            document.getElementById('btn-draw').addEventListener('click', function() {
+                const selected = document.getElementById('draw-session-filter').value;
+                let pool = [...new Set(
+                    drawEntries.filter(e => !selected || e.session === selected).map(e => e.name)
+                )];
+
+                let count = parseInt(document.getElementById('draw-count').value, 10);
+                if (!count || count < 1) {
+                    showToast("กรุณาระบุจำนวนรางวัลให้ถูกต้อง", "error");
+                    return;
+                }
+                if (pool.length === 0) {
+                    showToast("ไม่มีรายชื่อสำหรับจับรางวัลในครั้งที่เลือก", "error");
+                    return;
+                }
+                if (count > pool.length) {
+                    count = pool.length;
+                    showToast(`มีรายชื่อเพียง ${pool.length} คน จะสุ่มทั้งหมด`, "error");
+                }
+
+                // สุ่มลำดับแบบ Fisher-Yates
+                for (let i = pool.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [pool[i], pool[j]] = [pool[j], pool[i]];
+                }
+                const winners = pool.slice(0, count);
+
+                // เอฟเฟกต์ลุ้นระหว่างสุ่ม
+                const btn = this;
+                const original = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = `<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> กำลังสุ่ม...`;
+
+                setTimeout(() => {
+                    renderWinners(winners);
+                    btn.disabled = false;
+                    btn.innerHTML = original;
+                    showToast(`สุ่มผู้โชคดี ${winners.length} คนเรียบร้อย 🎉`, "success");
+                }, 900);
             });
 
             // Start processing
