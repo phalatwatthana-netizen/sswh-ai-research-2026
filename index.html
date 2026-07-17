@@ -223,6 +223,16 @@
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-5 bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm" id="section-1-container">
                         <div class="space-y-2">
+                            <label class="text-base font-semibold text-slate-700">คำนำหน้า <span class="text-brand-pink">*</span></label>
+                            <select id="input-prefix" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 transition-all duration-300 hover:border-brand-purple/50 hover:shadow-lg hover:shadow-brand-purple/20 appearance-none cursor-pointer" style="background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%2224%22%20height%3D%2224%22%20viewBox%3D%220%200%2024%2024%22%20fill%3D%22none%22%20stroke%3D%22%238b5cf6%22%20stroke-width%3D%222%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%3E%3Cpolyline%20points%3D%226%209%2012%2015%2018%209%22%3E%3C%2Fpolyline%3E%3C%2Fsvg%3E'); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1.2em;">
+                                <option value="">เลือกคำนำหน้า</option>
+                                <option value="นาย">นาย</option>
+                                <option value="นาง">นาง</option>
+                                <option value="นางสาว">นางสาว</option>
+                            </select>
+                            <p class="text-red-500 text-sm font-medium mt-1 hidden" id="error-prefix">กรุณาเลือกคำนำหน้า</p>
+                        </div>
+                        <div class="space-y-2">
                             <label class="text-base font-semibold text-slate-700">ชื่อ <span class="text-brand-pink">*</span></label>
                             <input type="text" id="input-fname" placeholder="ระบุชื่อ" autocomplete="off" class="w-full p-3 border-2 border-brand-purple/30 rounded-xl focus:ring-4 focus:ring-brand-purple/20 focus:border-brand-purple outline-none text-base font-medium text-slate-700 bg-white shadow-md shadow-brand-purple/10 disabled:opacity-50 transition-all duration-300 hover:border-brand-purple/50 hover:shadow-lg hover:shadow-brand-purple/20" />
                             <p class="text-red-500 text-sm font-medium mt-1 hidden" id="error-fname">กรุณาระบุชื่อ</p>
@@ -721,7 +731,10 @@
                 removeErrorState('input-age', 'error-age');
             });
 
-            // ล้าง error ของช่องชื่อ-นามสกุล เมื่อพิมพ์
+            // ล้าง error ของคำนำหน้า / ชื่อ / นามสกุล
+            document.getElementById('input-prefix').addEventListener('change', function() {
+                removeErrorState('input-prefix', 'error-prefix');
+            });
             document.getElementById('input-fname').addEventListener('input', function() {
                 removeErrorState('input-fname', 'error-fname');
             });
@@ -1978,9 +1991,15 @@
 
                 let hasError = false;
 
-                // Validate ชื่อ-นามสกุล
+                // Validate คำนำหน้า / ชื่อ / นามสกุล
+                const prefixInput = document.getElementById('input-prefix');
                 const fnameInput = document.getElementById('input-fname');
                 const lnameInput = document.getElementById('input-lname');
+                if (!prefixInput.value) {
+                    prefixInput.classList.add('input-error');
+                    document.getElementById('error-prefix').classList.remove('hidden');
+                    hasError = true;
+                }
                 if (!fnameInput.value.trim()) {
                     fnameInput.classList.add('input-error');
                     document.getElementById('error-fname').classList.remove('hidden');
@@ -2053,7 +2072,8 @@
                 btnSubmit.disabled = true;
                 btnSubmit.innerHTML = `<svg class="animate-spin w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg> กำลังบันทึกข้อมูล...`;
 
-                const fullName = (document.getElementById('input-fname').value.trim() + ' ' + document.getElementById('input-lname').value.trim()).trim();
+                const prefixVal = document.getElementById('input-prefix').value;
+                const fullName = (prefixVal + document.getElementById('input-fname').value.trim() + ' ' + document.getElementById('input-lname').value.trim()).trim();
                 const payload = {
                     "ชื่อ-สกุล (ใบประกาศ)": fullName || "ไม่ระบุชื่อ",
                     "ครั้งที่เข้าอบรม": getSelectValue('session'),
