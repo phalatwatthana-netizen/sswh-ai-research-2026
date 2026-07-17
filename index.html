@@ -426,9 +426,10 @@
                         <table class="w-full text-left border-collapse min-w-[500px]">
                             <thead>
                                 <tr class="bg-white/40 text-slate-600 text-base border-b border-white/60 tracking-wider backdrop-blur-sm">
-                                    <th class="p-4 font-semibold w-3/5 border-r border-white/60 pl-6">หมวดหมู่การประเมิน</th>
-                                    <th class="p-4 font-semibold text-center w-1/5 border-r border-white/60">คะแนนเฉลี่ย</th>
-                                    <th class="p-4 font-semibold text-center w-1/5">แปลผล</th>
+                                    <th class="p-4 font-semibold w-2/5 border-r border-white/60 pl-6">หมวดหมู่การประเมิน</th>
+                                    <th class="p-4 font-semibold text-center border-r border-white/60">คะแนนเฉลี่ย</th>
+                                    <th class="p-4 font-semibold text-center border-r border-white/60">S.D.</th>
+                                    <th class="p-4 font-semibold text-center">แปลผล</th>
                                 </tr>
                             </thead>
                             <tbody id="category-average-table-body" class="text-base text-slate-700 bg-white/20 backdrop-blur-sm">
@@ -450,6 +451,7 @@
                                     <th class="p-5 font-semibold w-2/5 pl-8 border-r border-white/60" rowspan="2">หัวข้อการประเมิน</th>
                                     <th class="p-4 font-semibold text-center border-b border-r border-white/60" colspan="5">จำนวนผู้ตอบและร้อยละตามระดับความพึงพอใจ</th>
                                     <th class="p-5 font-semibold text-center border-r border-white/60" rowspan="2">คะแนนเฉลี่ย</th>
+                                    <th class="p-5 font-semibold text-center border-r border-white/60" rowspan="2">S.D.</th>
                                     <th class="p-5 font-semibold text-center pr-8" rowspan="2">แปลผล</th>
                                 </tr>
                                 <tr class="bg-white/20 text-slate-600 text-sm border-b border-white/60 backdrop-blur-sm">
@@ -1016,6 +1018,21 @@
             };
 
 
+            // คำนวณค่าเฉลี่ยและ S.D. รวมจากทุกคำตอบทุกหมวด (รวมทั้งชุดข้อมูล)
+            const computeOverallStats = (data) => {
+                let n = 0, totalScore = 0;
+                data.forEach(sec => sec.items.forEach(it => {
+                    it.scales.forEach((c, idx) => { totalScore += c * (5 - idx); n += c; });
+                }));
+                const mean = n > 0 ? totalScore / n : 0;
+                let sq = 0;
+                data.forEach(sec => sec.items.forEach(it => {
+                    it.scales.forEach((c, idx) => { sq += c * Math.pow((5 - idx) - mean, 2); });
+                }));
+                const sd = n > 1 ? Math.sqrt(sq / (n - 1)) : 0;
+                return { mean, sd };
+            };
+
             const processAndRenderDashboardData = () => {
                 const normalize = s => s.replace(/\s+/g, '').toLowerCase();
                 const sessionColIdx = rawDashboardHeaders.findIndex(h => normalize(h).includes("ครั้งที่"));
@@ -1083,13 +1100,33 @@
                                 }
                             });
                         }
-                        return { question: q, score: validCount > 0 ? (totalScore / validCount) : 0, scales, validCount };
+                        const mean = validCount > 0 ? (totalScore / validCount) : 0;
+                        // คำนวณส่วนเบี่ยงเบนมาตรฐาน (S.D.) แบบ sample (หาร n-1) จากตารางความถี่
+                        let sumSqDiff = 0;
+                        scales.forEach((count, idx) => {
+                            const value = 5 - idx; // idx 0 = คะแนน 5, idx 4 = คะแนน 1
+                            sumSqDiff += count * Math.pow(value - mean, 2);
+                        });
+                        const sd = validCount > 1 ? Math.sqrt(sumSqDiff / (validCount - 1)) : 0;
+
+                        return { question: q, score: mean, sd, scales, validCount };
                     });
 
                     const sectionTotalScore = items.reduce((sum, item) => sum + (item.score * item.validCount), 0);
                     const sectionTotalCount = items.reduce((sum, item) => sum + item.validCount, 0);
+                    const sectionMean = sectionTotalCount > 0 ? (sectionTotalScore / sectionTotalCount) : 0;
 
-                    return { title: section.title, average: sectionTotalCount > 0 ? (sectionTotalScore / sectionTotalCount) : 0, items };
+                    // S.D. รวมของหมวด: รวมทุกคำตอบในหมวดแล้วคำนวณจากค่าเฉลี่ยของหมวด
+                    let sectionSumSqDiff = 0;
+                    items.forEach(item => {
+                        item.scales.forEach((count, idx) => {
+                            const value = 5 - idx;
+                            sectionSumSqDiff += count * Math.pow(value - sectionMean, 2);
+                        });
+                    });
+                    const sectionSd = sectionTotalCount > 1 ? Math.sqrt(sectionSumSqDiff / (sectionTotalCount - 1)) : 0;
+
+                    return { title: section.title, average: sectionMean, sd: sectionSd, items };
                 });
 
                 // เก็บข้อมูลไว้ใช้ตอนพรีวิว
@@ -1266,10 +1303,12 @@
                                                           'bg-brand-orange/10 text-brand-orange border border-brand-orange/20';
                         let itemLabel = secAvg >= 4.5 ? 'มากที่สุด' : secAvg >= 3.5 ? 'มาก' : 'ปานกลาง';
 
+                        const secSd = (section.sd || 0).toFixed(2);
                         html += `
                             <tr class="border-b border-white/30 hover:bg-white/40 transition-colors">
                                 <td class="p-4 pl-6 font-medium border-r border-white/60">${section.title}</td>
                                 <td class="p-4 text-center font-bold text-slate-800 text-lg border-r border-white/60">${secAvg}</td>
+                                <td class="p-4 text-center font-semibold text-slate-600 border-r border-white/60">${secSd}</td>
                                 <td class="p-4 text-center">
                                     <span class="px-4 py-2 rounded-lg text-sm font-bold tracking-wide inline-block min-w-[90px] ${badgeClass}">${itemLabel}</span>
                                 </td>
@@ -1279,6 +1318,7 @@
 
                     const totalScoreSum = data.reduce((sum, sec) => sum + (sec.average || 0), 0);
                     const overallAvg = data.length > 0 ? (totalScoreSum / data.length).toFixed(2) : "0.00";
+                    const overallSd = computeOverallStats(data).sd.toFixed(2);
                     let overallBadge = overallAvg >= 4.5 ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
                                          overallAvg >= 3.5 ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20' :
                                                           'bg-brand-orange/10 text-brand-orange border border-brand-orange/20';
@@ -1288,6 +1328,7 @@
                         <tr class="bg-white/40 border-b border-white/60 font-bold text-brand-purple">
                             <td class="p-4 pl-6 border-r border-white/60 text-right">คะแนนเฉลี่ยรวมทุกหมวดหมู่</td>
                             <td class="p-4 text-center text-xl border-r border-white/60">${overallAvg}</td>
+                            <td class="p-4 text-center text-lg border-r border-white/60">${overallSd}</td>
                             <td class="p-4 text-center">
                                 <span class="px-4 py-2 rounded-lg text-sm font-bold tracking-wide inline-block min-w-[90px] ${overallBadge}">${overallLabel}</span>
                             </td>
@@ -1306,11 +1347,13 @@
                     const secAvg = (section.average || 0).toFixed(2);
                     const secLabel = secAvg >= 4.5 ? 'มากที่สุด' : secAvg >= 3.5 ? 'มาก' : 'ปานกลาง';
 
+                    const secSd = (section.sd || 0).toFixed(2);
                     tableHTML += `
                         <tr class="bg-white/40 border-b border-white/60">
                             <td class="p-5 pl-8 font-bold text-brand-purple text-lg border-r border-white/60">${section.title}</td>
                             <td class="p-5 text-center text-slate-400 border-r border-white/60" colspan="5"></td>
                             <td class="p-5 font-bold text-center text-brand-purple text-lg border-r border-white/60">${secAvg}</td>
+                            <td class="p-5 font-bold text-center text-brand-purple border-r border-white/60">${secSd}</td>
                             <td class="p-5 text-center pr-8">
                                 <span class="px-4 py-2 bg-brand-purple/10 text-brand-purple border border-brand-purple/20 rounded-lg text-sm font-bold tracking-wide">${secLabel}</span>
                             </td>
@@ -1335,6 +1378,7 @@
                         });
 
                         const itemAvg = (item.score || 0).toFixed(2);
+                        const itemSd = (item.sd || 0).toFixed(2);
                         let badgeClass = itemAvg >= 4.5 ? 'bg-brand-green/10 text-brand-green border border-brand-green/20' :
                                          itemAvg >= 3.5 ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20' :
                                                           'bg-brand-orange/10 text-brand-orange border border-brand-orange/20';
@@ -1350,6 +1394,7 @@
                                 </td>
                                 ${scalesHTML}
                                 <td class="p-5 text-center font-bold text-slate-800 text-lg border-r border-white/60">${itemAvg}</td>
+                                <td class="p-5 text-center font-semibold text-slate-600 border-r border-white/60">${itemSd}</td>
                                 <td class="p-5 text-center pr-8">
                                     <span class="px-4 py-2 rounded-lg text-sm font-bold tracking-wide inline-block min-w-[90px] ${badgeClass}">${itemLabel}</span>
                                 </td>
@@ -1461,31 +1506,36 @@
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10.5pt; color: #1e293b;">
                             <thead>
                                 <tr>
-                                    <th style="width: 50%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">หมวดหมู่การประเมิน</th>
-                                    <th style="width: 25%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">คะแนนเฉลี่ย</th>
-                                    <th style="width: 25%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">แปลผล</th>
+                                    <th style="width: 46%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">หมวดหมู่การประเมิน</th>
+                                    <th style="width: 18%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">คะแนนเฉลี่ย</th>
+                                    <th style="width: 18%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">S.D.</th>
+                                    <th style="width: 18%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">แปลผล</th>
                                 </tr>
                             </thead>
                             <tbody>
                     `;
                     data.forEach(section => {
                         const secAvg = (section.average || 0).toFixed(2);
+                        const secSd = (section.sd || 0).toFixed(2);
                         let itemLabel = secAvg >= 4.5 ? 'มากที่สุด' : secAvg >= 3.5 ? 'มาก' : 'ปานกลาง';
                         html += `
                             <tr>
                                 <td style="border: 1px solid #cbd5e1; padding: 6px 10px;">${section.title}</td>
                                 <td style="border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center; font-weight: 600;">${secAvg}</td>
+                                <td style="border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;">${secSd}</td>
                                 <td style="border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;">${itemLabel}</td>
                             </tr>
                         `;
                     });
                     const totalScoreSum = data.reduce((sum, sec) => sum + (sec.average || 0), 0);
                     const overallAvg = data.length > 0 ? (totalScoreSum / data.length).toFixed(2) : "0.00";
+                    const overallSd = computeOverallStats(data).sd.toFixed(2);
                     let overallLabel = overallAvg >= 4.5 ? 'มากที่สุด' : overallAvg >= 3.5 ? 'มาก' : 'ปานกลาง';
                     html += `
                         <tr style="background-color: #f8fafc; font-weight: bold;">
                             <td style="border: 1px solid #cbd5e1; padding: 8px 10px; text-align: right;">คะแนนเฉลี่ยรวมทุกหมวดหมู่</td>
                             <td style="border: 1px solid #cbd5e1; padding: 8px 10px; text-align: center; font-weight: bold; color: #8b5cf6;">${overallAvg}</td>
+                            <td style="border: 1px solid #cbd5e1; padding: 8px 10px; text-align: center; font-weight: bold; color: #8b5cf6;">${overallSd}</td>
                             <td style="border: 1px solid #cbd5e1; padding: 8px 10px; text-align: center;">${overallLabel}</td>
                         </tr>
                     </tbody></table>`;
@@ -1498,10 +1548,11 @@
                         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 10.5pt; color: #1e293b;">
                             <thead>
                                 <tr>
-                                    <th rowspan="2" style="width: 45%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">หัวข้อการประเมิน</th>
+                                    <th rowspan="2" style="width: 40%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">หัวข้อการประเมิน</th>
                                     <th colspan="5" style="border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">ระดับความพึงพอใจ (จำนวนและร้อยละ)</th>
-                                    <th rowspan="2" style="width: 10%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">เฉลี่ย</th>
-                                    <th rowspan="2" style="width: 15%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">แปลผล</th>
+                                    <th rowspan="2" style="width: 9%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">เฉลี่ย</th>
+                                    <th rowspan="2" style="width: 9%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">S.D.</th>
+                                    <th rowspan="2" style="width: 12%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">แปลผล</th>
                                 </tr>
                                 <tr>
                                     <th style="width: 6%; border: 1px solid #cbd5e1; padding: 8px 10px; background-color: #f1f5f9; text-align: center; font-weight: 600;">5</th>
@@ -1522,6 +1573,7 @@
                                 <td style="font-weight: 600; color: #1e293b; border: 1px solid #cbd5e1; padding: 8px 10px;">${section.title}</td>
                                 <td colspan="5" style="border: 1px solid #cbd5e1;"></td>
                                 <td style="text-align: center; font-weight: 600; color: #1e293b; border: 1px solid #cbd5e1;">${secAvg}</td>
+                                <td style="text-align: center; font-weight: 600; color: #1e293b; border: 1px solid #cbd5e1;">${(section.sd || 0).toFixed(2)}</td>
                                 <td style="text-align: center; font-weight: 600; color: #1e293b; border: 1px solid #cbd5e1;">${secLabel}</td>
                             </tr>
                         `;
@@ -1544,6 +1596,7 @@
                             });
 
                             const itemAvg = (item.score || 0).toFixed(2);
+                            const itemSd = (item.sd || 0).toFixed(2);
                             let itemLabel = itemAvg >= 4.5 ? 'มากที่สุด' : itemAvg >= 3.5 ? 'มาก' : 'ปานกลาง';
 
                             html += `
@@ -1551,6 +1604,7 @@
                                     <td style="color: #334155; border: 1px solid #cbd5e1; padding: 8px 10px;">${item.question}</td>
                                     ${scalesHTML}
                                     <td style="text-align: center; font-weight: 600; color: #0f172a; border: 1px solid #cbd5e1;">${itemAvg}</td>
+                                    <td style="text-align: center; color: #475569; border: 1px solid #cbd5e1;">${itemSd}</td>
                                     <td style="text-align: center; color: #475569; border: 1px solid #cbd5e1;">${itemLabel}</td>
                                 </tr>
                             `;
